@@ -1,75 +1,57 @@
-# Nuxt Minimal Starter
+# VardiNote Auth
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+VardiNote mobil uygulaması için kimlik doğrulama sayfaları. Bu proje, Supabase auth işlemleri için email doğrulama ve şifre sıfırlama sayfalarını içerir.
 
-## Setup
+## Özellikler
 
-Make sure to install dependencies:
+- Email doğrulama
+- Şifre sıfırlama
+- Modern ve duyarlı tasarım
+- Supabase entegrasyonu
 
+## Teknolojiler
+
+- Nuxt.js 3
+- Tailwind CSS
+- Supabase
+- Vue 3
+
+## Kurulum
+
+1. Projeyi klonlayın:
 ```bash
-# npm
+git clone [repo-url]
+```
+
+2. Bağımlılıkları yükleyin:
+```bash
 npm install
-
-# pnpm
-pnpm install
-
-# yarn
-yarn install
-
-# bun
-bun install
 ```
 
-## Development Server
-
-Start the development server on `http://localhost:3000`:
-
+3. Geliştirme sunucusunu başlatın:
 ```bash
-# npm
 npm run dev
-
-# pnpm
-pnpm dev
-
-# yarn
-yarn dev
-
-# bun
-bun run dev
 ```
 
-## Production
+## Yapılandırma
 
-Build the application for production:
-
-```bash
-# npm
-npm run build
-
-# pnpm
-pnpm build
-
-# yarn
-yarn build
-
-# bun
-bun run build
+1. `.env` dosyası oluşturun ve Supabase bilgilerinizi ekleyin:
+```
+SUPABASE_URL=your-supabase-url
+SUPABASE_KEY=your-supabase-anon-key
 ```
 
-Locally preview production build:
+## URL'ler
 
-```bash
-# npm
-npm run preview
+- Site URL: https://vardinote-auth.vercel.app
+- Email Doğrulama: https://vardinote-auth.vercel.app/confirm
+- Şifre Sıfırlama: https://vardinote-auth.vercel.app/reset-password
 
-# pnpm
-pnpm preview
+## Supabase Yapılandırması
 
-# yarn
-yarn preview
+Supabase projenizde aşağıdaki URL'leri yapılandırın:
 
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
+- Site URL: https://vardinote-auth.vercel.app
+- Redirect URLs:
+  - https://vardinote-auth.vercel.app/confirm
+  - https://vardinote-auth.vercel.app/reset-password
