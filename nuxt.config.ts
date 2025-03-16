@@ -19,15 +19,11 @@ export default defineNuxtConfig({
       ]
     }
   },
-  runtimeConfig: {
-    public: {
-      supabase: {
-        redirectOptions: {
-          login: '/',
-          callback: '/confirm',
-          exclude: ['/']
-        }
-      }
+  supabase: {
+    redirectOptions: {
+      login: '/',
+      callback: '/confirm',
+      exclude: ['/', '/reset-password']
     }
   }
 })

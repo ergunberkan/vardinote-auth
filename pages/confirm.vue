@@ -42,18 +42,28 @@ const success = ref(false)
 
 onMounted(async () => {
   try {
+    // URL'den code parametresini al
+    const code = route.query.code
+
+    if (!code) {
+      error.value = 'Geçersiz doğrulama bağlantısı.'
+      return
+    }
+
     const { error: err } = await client.auth.verifyOtp({
-      token_hash: route.hash.substring(1),
-      type: 'email'
+      token: code,
+      type: 'signup'
     })
     
     if (err) {
       error.value = 'Email doğrulama işlemi başarısız oldu. Lütfen tekrar deneyin.'
+      console.error('Doğrulama hatası:', err)
     } else {
       success.value = true
     }
   } catch (err) {
     error.value = 'Bir hata oluştu. Lütfen tekrar deneyin.'
+    console.error('Beklenmeyen hata:', err)
   } finally {
     loading.value = false
   }
