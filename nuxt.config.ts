@@ -23,9 +23,9 @@ export default defineNuxtConfig({
     public: {
       supabase: {
         redirectOptions: {
-          login: '/auth/signin',
+          login: '/',
           callback: '/confirm',
-          exclude: ['/auth/*']
+          exclude: ['/']
         }
       }
     }
