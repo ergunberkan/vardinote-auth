@@ -42,24 +42,34 @@ const success = ref(false)
 
 onMounted(async () => {
   try {
-    // URL'den code parametresini al
-    const code = route.query.code
+    // Client-side'da window objesini kullan
+    if (process.client) {
+      const hash = window.location.hash.substring(1)
+      const params = new URLSearchParams(hash)
+      const token = params.get('token')
+      const email = params.get('email')
 
-    if (!code) {
-      error.value = 'Geçersiz doğrulama bağlantısı.'
-      return
-    }
+      console.log('Hash:', hash) // Debug için
+      console.log('Token:', token) // Debug için
+      console.log('Email:', email) // Debug için
 
-    const { error: err } = await client.auth.verifyOtp({
-      token: code,
-      type: 'signup'
-    })
-    
-    if (err) {
-      error.value = 'Email doğrulama işlemi başarısız oldu. Lütfen tekrar deneyin.'
-      console.error('Doğrulama hatası:', err)
-    } else {
-      success.value = true
+      if (!token || !email) {
+        error.value = 'Geçersiz doğrulama bağlantısı.'
+        return
+      }
+
+      const { error: err } = await client.auth.verifyOtp({
+        email,
+        token,
+        type: 'signup'
+      })
+      
+      if (err) {
+        error.value = 'Email doğrulama işlemi başarısız oldu. Lütfen tekrar deneyin.'
+        console.error('Doğrulama hatası:', err)
+      } else {
+        success.value = true
+      }
     }
   } catch (err) {
     error.value = 'Bir hata oluştu. Lütfen tekrar deneyin.'
