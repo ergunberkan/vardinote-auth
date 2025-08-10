@@ -72,37 +72,43 @@ const success = ref(false)
 onMounted(async () => {
   try {
     if (process.client) {
-      const hash = window.location.hash.substring(1)
-      const params = new URLSearchParams(hash)
-      const token = params.get('token')
-      const email = params.get('email')
+      // URL'den code parametresini al (hash yerine query string)
+      const code = route.query.code
+      const email = route.query.email
 
-      if (!token || !email) {
-        error.value = 'Geçersiz doğrulama bağlantısı.'
+      console.log('�� Gelen parametreler:', { code, email })
+
+      if (!code) {
+        error.value = 'Doğrulama kodu bulunamadı.'
         return
       }
 
-      const { error: err } = await client.auth.verifyOtp({
-        email,
-        token,
+      // Supabase OTP doğrulama
+      const { data, error: verifyError } = await client.auth.verifyOtp({
+        token: code,
         type: 'signup'
       })
       
-      if (err) {
-        error.value = 'Email doğrulama işlemi başarısız oldu. Lütfen tekrar deneyin.'
-        console.error('Doğrulama hatası:', err)
+      if (verifyError) {
+        error.value = `Email doğrulama hatası: ${verifyError.message}`
+        console.error('🔴 Doğrulama hatası:', verifyError)
       } else {
         success.value = true
+        console.log('✅ Email doğrulama başarılı:', data)
+        
+       
       }
     }
   } catch (err) {
-    error.value = 'Bir hata oluştu. Lütfen tekrar deneyin.'
-    console.error('Beklenmeyen hata:', err)
+    error.value = 'Beklenmeyen bir hata oluştu. Lütfen tekrar deneyin.'
+    console.error('🔴 Beklenmeyen hata:', err)
   } finally {
     loading.value = false
   }
 })
 </script>
+
+
 
 <style>
 @keyframes fade-in {
