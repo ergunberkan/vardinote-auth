@@ -73,42 +73,50 @@ const success = ref(false)
 onMounted(async () => {
   try {
     if (process.client) {
-      const code = route.query.code
+      const token = route.query.token
       const email = route.query.email
 
-      console.log(' Gelen parametreler:', { code, email })
+      console.log(' Gelen parametreler:', { token, email })
+      console.log(' Full URL:', window.location.href)
 
-      if (!code) {
-        error.value = 'Doğrulama kodu bulunamadı.'
+      if (!token) {
+        error.value = 'Doğrulama token\'ı bulunamadı.'
         return
       }
 
-      // PKCE token için exchangeCodeForSession kullan
-      const { data, error: exchangeError } = await client.auth.exchangeCodeForSession(code)
+      // Önce token'ı exchange et
+      console.log('🔄 Token exchange deneniyor...')
+      const { data, error: exchangeError } = await client.auth.exchangeCodeForSession(token)
       
       if (exchangeError) {
-        error.value = `Email doğrulama hatası: ${exchangeError.message}`
         console.error('�� Exchange hatası:', exchangeError)
         
-        // Token expired hatası için özel mesaj
-        if (exchangeError.message.includes('expired') || exchangeError.message.includes('invalid')) {
-          error.value = 'Doğrulama linki süresi dolmuş. Lütfen yeni bir doğrulama linki isteyin.'
+        // Exchange başarısızsa, verifyOtp dene
+        console.log('🔄 VerifyOtp deneniyor...')
+        const { data: verifyData, error: verifyError } = await client.auth.verifyOtp({
+          email: email,
+          token: token,
+          type: 'signup'
+        })
+        
+        if (verifyError) {
+          console.error('🔴 VerifyOtp hatası:', verifyError)
+          error.value = `Doğrulama hatası: ${verifyError.message}`
+        } else {
+          success.value = true
+          console.log('✅ Email doğrulama başarılı (verifyOtp):', verifyData)
         }
       } else {
         success.value = true
-        console.log('✅ Email doğrulama başarılı:', data)
-        
-        // Kullanıcı bilgilerini göster
-        if (data.user) {
-          console.log('✅ Kullanıcı bilgileri:', {
-            id: data.user.id,
-            email: data.user.email,
-            emailConfirmedAt: data.user.email_confirmed_at
-          })
-        }
-        
+        console.log('✅ Email doğrulama başarılı (exchange):', data)
+      }
+
+      // Başarılı doğrulama sonrası
+      if (success.value) {
         // 3 saniye sonra Flutter uygulamasına yönlendir
-       
+        setTimeout(() => {
+          window.location.href = 'vardinote://auth/confirm'
+        }, 3000)
       }
     }
   } catch (err) {
