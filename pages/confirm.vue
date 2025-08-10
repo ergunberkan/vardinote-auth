@@ -72,19 +72,20 @@ const success = ref(false)
 onMounted(async () => {
   try {
     if (process.client) {
-      // URL'den code parametresini al (hash yerine query string)
+      // URL'den parametreleri al
       const code = route.query.code
       const email = route.query.email
 
-      console.log('�� Gelen parametreler:', { code, email })
+      console.log(' Gelen parametreler:', { code, email })
 
-      if (!code) {
-        error.value = 'Doğrulama kodu bulunamadı.'
+      if (!code || !email) {
+        error.value = 'Doğrulama bilgileri eksik. Lütfen email\'deki linke tekrar tıklayın.'
         return
       }
 
-      // Supabase OTP doğrulama
+      // Supabase email doğrulama - doğru yöntem
       const { data, error: verifyError } = await client.auth.verifyOtp({
+        email: email,
         token: code,
         type: 'signup'
       })
@@ -96,7 +97,10 @@ onMounted(async () => {
         success.value = true
         console.log('✅ Email doğrulama başarılı:', data)
         
-       
+        // 3 saniye sonra Flutter uygulamasına yönlendir
+        setTimeout(() => {
+          window.location.href = 'vardinote://auth/confirm'
+        }, 3000)
       }
     }
   } catch (err) {
