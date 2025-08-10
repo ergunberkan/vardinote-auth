@@ -62,6 +62,7 @@
   </div>
 </template>
 
+
 <script setup>
 const client = useSupabaseClient()
 const route = useRoute()
@@ -72,35 +73,42 @@ const success = ref(false)
 onMounted(async () => {
   try {
     if (process.client) {
-      // URL'den parametreleri al
       const code = route.query.code
       const email = route.query.email
 
       console.log(' Gelen parametreler:', { code, email })
 
-      if (!code || !email) {
-        error.value = 'Doğrulama bilgileri eksik. Lütfen email\'deki linke tekrar tıklayın.'
+      if (!code) {
+        error.value = 'Doğrulama kodu bulunamadı.'
         return
       }
 
-      // Supabase email doğrulama - doğru yöntem
-      const { data, error: verifyError } = await client.auth.verifyOtp({
-        email: email,
-        token: code,
-        type: 'signup'
-      })
+      // PKCE token için exchangeCodeForSession kullan
+      const { data, error: exchangeError } = await client.auth.exchangeCodeForSession(code)
       
-      if (verifyError) {
-        error.value = `Email doğrulama hatası: ${verifyError.message}`
-        console.error('🔴 Doğrulama hatası:', verifyError)
+      if (exchangeError) {
+        error.value = `Email doğrulama hatası: ${exchangeError.message}`
+        console.error('�� Exchange hatası:', exchangeError)
+        
+        // Token expired hatası için özel mesaj
+        if (exchangeError.message.includes('expired') || exchangeError.message.includes('invalid')) {
+          error.value = 'Doğrulama linki süresi dolmuş. Lütfen yeni bir doğrulama linki isteyin.'
+        }
       } else {
         success.value = true
         console.log('✅ Email doğrulama başarılı:', data)
         
+        // Kullanıcı bilgilerini göster
+        if (data.user) {
+          console.log('✅ Kullanıcı bilgileri:', {
+            id: data.user.id,
+            email: data.user.email,
+            emailConfirmedAt: data.user.email_confirmed_at
+          })
+        }
+        
         // 3 saniye sonra Flutter uygulamasına yönlendir
-        setTimeout(() => {
-          window.location.href = 'vardinote://auth/confirm'
-        }, 3000)
+       
       }
     }
   } catch (err) {
